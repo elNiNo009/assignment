@@ -1,21 +1,52 @@
 import React from 'react';
-import Members from './Members';
+import MemberShow from './MemberShow';
 
+import { useContext,useState,useEffect } from 'react';
+import { MemberContext } from './MembersContext';
 
 import classes from './CompanyList.module.css';
+import  Pagination  from './Pagination';
 
-const MembersList = (props) => {
+const MembersList = () => {
+
+
+const {members}=useContext(MemberContext)
+// console.log("member lsit")
+//   console.log(members)
+const [search, setSearch] = useState("");
+const [filteredMembers, setFilteredMembers] = useState([]);
+useEffect(() => {
+  setFilteredMembers(
+    members.filter((member) =>
+      member.name.toLowerCase().includes(search.toLowerCase())
+    )
+  );
+}, [search, members]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [membersPerPage] = useState(3);
+  const indexOfLastMember = currentPage * membersPerPage;
+  const indexOfFirstMember= indexOfLastMember - membersPerPage;
+  const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
+
+  const paginate = pageNumber => setCurrentPage(pageNumber);
+
+  
   return (
-    <ul className={classes['movies-list']}>
-      {props.members.map((member) => (
-        <Members
-          key={member.id}
-          name={member.name}
-          createdDate={member.createdDate}
-         
-        />
-      ))}
-    </ul>
+    <div>
+    <div>
+    <input
+    type="text"
+    placeholder="Search Members"
+    onChange={(e) => setSearch(e.target.value)}
+  />
+    </div>
+  
+   <MemberShow members={currentMembers}/>
+  <Pagination membersPerPage={membersPerPage} totalMembers={filteredMembers.length} paginate={paginate}/>
+    </div>
+  
+    
   );
 };
 
